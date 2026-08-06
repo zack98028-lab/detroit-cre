@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Buyer Profile Survey</title>
+<style>
+:root {
+  --bg:      #F9F6F1;
+  --surface: #FFFFFF;
+  --ink:     #1A1714;
+  --ink-2:   #6B6560;
+  --ink-3:   #B0A89E;
+  --green:   #1E4D35;
+  --green-lt:#E8F0EC;
+  --gold:    #B8924A;
+  --border:  #E0DAD2;
+  --line:    #D4CEC6;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#131210;--surface:#1C1A17;--ink:#F0EDE8;--ink-2:#908880;
+  --ink-3:#585248;--green:#5FAF7E;--green-lt:#1E4D3520;--border:#2E2B27;--line:#2A2720;
+}}
+:root[data-theme="light"]{--bg:#F9F6F1;--surface:#FFFFFF;--ink:#1A1714;--ink-2:#6B6560;--ink-3:#B0A89E;--green:#1E4D35;--green-lt:#E8F0EC;--border:#E0DAD2;--line:#D4CEC6;}
+:root[data-theme="dark"]{--bg:#131210;--surface:#1C1A17;--ink:#F0EDE8;--ink-2:#908880;--ink-3:#585248;--green:#5FAF7E;--green-lt:#1E4D3520;--border:#2E2B27;--line:#2A2720;}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  min-height:100vh; display:flex; flex-direction:column;
+  overflow-x:hidden;
+}
+
+/* ── RULED BACKGROUND LINES ── */
+body::before{
+  content:'';
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px);
+  background-size:100% 48px;
+  opacity:0.35;
+}
+@media(prefers-color-scheme:dark){body::before{opacity:0.15;}}
+
+/* ── PROGRESS ── */
+.prog{position:fixed;top:0;left:0;right:0;height:2px;background:var(--border);z-index:200;}
+.prog-fill{height:100%;background:var(--green);transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;}
+
+/* ── CORNER MARKS ── */
+.corner{position:fixed;pointer-events:none;z-index:1;}
+.corner-tl{top:20px;left:20px;}
+.corner-br{bottom:20px;right:20px;}
+.corner svg{opacity:0.15;}
+
+/* ── HEADER ── */
+.hdr{
+  position:relative;z-index:10;
+  padding:32px 48px 0;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.hdr-brand{
+  font-size:12px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.hdr-accent{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);display:inline-block;margin-right:8px;
+}
+@media(max-width:600px){.hdr{padding:20px 24px 0;}}
+
+/* ── MAIN ── */
+.wrap{
+  position:relative;z-index:10;
+  flex:1;display:flex;align-items:center;
+  justify-content:center;padding:48px 24px 72px;
+}
+
+/* ── SCREENS ── */
+.screen{display:none;width:100%;max-width:580px;}
+.screen.active{display:block;animation:appear .38s cubic-bezier(.4,0,.2,1) both;}
+.screen.leaving{animation:depart .28s cubic-bezier(.4,0,.2,1) both;}
+@keyframes appear{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes depart{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-14px);}}
+@media(prefers-reduced-motion:reduce){.screen.active,.screen.leaving{animation:none;}}
+
+/* ── INTRO ── */
+.intro-rule{
+  display:flex;align-items:center;gap:14px;margin-bottom:36px;
+}
+.rule-line{flex:1;height:1px;background:var(--border);}
+.rule-text{
+  font-size:11px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);white-space:nowrap;
+}
+.intro-h{
+  font-size:clamp(40px,7vw,72px);
+  font-family:Georgia,'Times New Roman',serif;
+  font-weight:700;letter-spacing:-.03em;line-height:1.0;
+  color:var(--ink);margin-bottom:22px;text-wrap:balance;
+}
+.intro-h em{font-style:italic;color:var(--green);}
+.intro-sub{
+  font-size:16px;color:var(--ink-2);line-height:1.75;
+  margin-bottom:44px;max-width:420px;
+}
+.intro-begin{
+  display:inline-flex;align-items:center;gap:14px;
+  font-size:15px;font-weight:700;color:var(--ink);
+  cursor:pointer;border:none;background:none;
+  font-family:inherit;padding:0;transition:gap .2s;
+}
+.intro-begin:hover{gap:20px;}
+.begin-pill{
+  background:var(--green);color:#fff;
+  border-radius:100px;padding:12px 24px;
+  font-size:14px;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+  transition:opacity .15s;
+}
+.intro-begin:hover .begin-pill{opacity:.88;}
+
+/* ── QUESTION ── */
+.q-rule{
+  display:flex;align-items:center;gap:12px;margin-bottom:28px;
+}
+.q-rule-line{height:1px;background:var(--border);flex:1;}
+.q-rule-dot{
+  width:8px;height:8px;border-radius:50%;
+  border:1.5px solid var(--green);flex-shrink:0;
+}
+
+.q-title{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:clamp(26px,4.5vw,38px);font-weight:700;
+  letter-spacing:-.02em;line-height:1.12;
+  color:var(--ink);margin-bottom:10px;text-wrap:balance;
+}
+.q-sub{
+  font-size:14px;color:var(--ink-2);margin-bottom:28px;line-height:1.6;
+}
+
+/* text input */
+.q-input,.q-textarea{
+  width:100%;border:none;border-bottom:1.5px solid var(--border);
+  padding:14px 0;font-size:18px;font-family:inherit;
+  color:var(--ink);background:transparent;outline:none;
+  transition:border-color .2s;resize:none;
+}
+.q-input:focus,.q-textarea:focus{border-color:var(--green);}
+.q-input::placeholder,.q-textarea::placeholder{color:var(--ink-3);}
+.q-input.err,.q-textarea.err{border-color:#C0392B;}
+
+.err-msg{font-size:13px;color:#C0392B;font-weight:500;min-height:18px;margin-top:8px;}
+
+.enter-hint{
+  display:flex;align-items:center;gap:8px;
+  margin-top:20px;color:var(--ink-3);font-size:13px;
+  cursor:pointer;width:fit-content;transition:color .15s;
+}
+.enter-hint:hover{color:var(--ink-2);}
+.enter-box{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 7px;border:1.5px solid var(--border);
+  border-radius:4px;font-size:10px;font-weight:700;
+  background:var(--surface);
+}
+
+/* options */
+.opts{display:grid;gap:8px;}
+.opts.g2{grid-template-columns:1fr 1fr;}
+@media(max-width:480px){.opts.g2{grid-template-columns:1fr;}}
+
+.opt{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:8px;padding:14px 18px;
+  cursor:pointer;font-size:15px;font-weight:500;
+  color:var(--ink);transition:all .12s;
+  display:flex;align-items:center;gap:12px;
+  user-select:none;text-align:left;
+}
+.opt:hover{border-color:var(--green);background:var(--green-lt);}
+.opt.sel{background:var(--green);border-color:var(--green);color:#fff;}
+.opt-k{
+  width:24px;height:24px;flex-shrink:0;border-radius:4px;
+  border:1.5px solid var(--border);display:flex;
+  align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;color:var(--ink-3);transition:all .12s;
+}
+.opt.sel .opt-k{background:rgba(255,255,255,.2);border-color:transparent;color:#fff;}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+.chip{
+  border:1.5px solid var(--border);border-radius:100px;
+  padding:9px 16px;font-size:14px;font-weight:500;
+  cursor:pointer;background:var(--surface);color:var(--ink);
+  transition:all .12s;user-select:none;
+}
+.chip:hover{border-color:var(--green);}
+.chip.sel{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* rating */
+.rating-row{display:flex;gap:8px;}
+.r-btn{
+  flex:1;aspect-ratio:1;border:1.5px solid var(--border);
+  border-radius:8px;background:var(--surface);
+  font-size:16px;font-weight:800;cursor:pointer;
+  color:var(--ink-2);transition:all .12s;font-family:inherit;
+}
+.r-btn:hover,.r-btn.sel{background:var(--green);border-color:var(--green);color:#fff;}
+.r-labs{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--ink-3);margin-top:8px;
+}
+
+/* ── PROFILE RESULT ── */
+.prof-rule{
+  display:flex;align-items:center;gap:12px;margin-bottom:28px;
+}
+.prof-rule-line{height:1px;background:rgba(255,255,255,.15);flex:1;}
+
+.prof-wrap{
+  background:var(--green);
+  border-radius:16px;
+  padding:48px 44px;
+  position:relative;overflow:hidden;
+}
+@media(max-width:600px){.prof-wrap{padding:32px 24px;}}
+
+/* decorative lines inside profile card */
+.prof-wrap::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:100% 40px;
+}
+.prof-wrap::after{
+  content:'';
+  position:absolute;top:-60px;right:-60px;
+  width:220px;height:220px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.08);
+  pointer-events:none;
+}
+
+.prof-icon{font-size:40px;display:block;margin-bottom:20px;position:relative;}
+.prof-label{
+  font-size:11px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(255,255,255,.45);
+  margin-bottom:10px;position:relative;
+}
+.prof-type{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:clamp(32px,6vw,52px);font-weight:700;
+  letter-spacing:-.03em;line-height:1.0;
+  color:#fff;margin-bottom:18px;
+  text-wrap:balance;position:relative;
+}
+.prof-desc{
+  font-size:15px;color:rgba(255,255,255,.6);
+  line-height:1.75;margin-bottom:32px;max-width:460px;position:relative;
+}
+.prof-divider{
+  border:none;border-top:1px solid rgba(255,255,255,.12);
+  margin-bottom:24px;position:relative;
+}
+.prof-traits{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;margin-bottom:28px;position:relative;
+}
+@media(max-width:480px){.prof-traits{grid-template-columns:1fr;}}
+.trait{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;padding:14px 16px;
+}
+.trait-l{
+  font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:4px;
+}
+.trait-v{font-size:14px;font-weight:700;color:rgba(255,255,255,.9);}
+
+.prof-team-row{
+  display:flex;align-items:center;gap:10px;
+  position:relative;
+}
+.prof-team-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);}
+.prof-team-text{font-size:14px;color:rgba(255,255,255,.55);font-weight:500;}
+
+.prof-restart{
+  margin-top:20px;background:none;border:none;
+  color:var(--ink-3);font-size:13px;font-weight:600;
+  font-family:inherit;cursor:pointer;padding:8px 0;
+  transition:color .15s;display:flex;align-items:center;gap:6px;
+}
+.prof-restart:hover{color:var(--ink-2);}
+</style>
+</head>
+<body>
+
+<div class="prog"><div class="prog-fill" id="pf"></div></div>
+
+<!-- Corner marks -->
+<div class="corner corner-tl">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M1 12V1H12" stroke="currentColor" stroke-width="1.5"/>
+  </svg>
+</div>
+<div class="corner corner-br">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M23 12V23H12" stroke="currentColor" stroke-width="1.5"/>
+  </svg>
+</div>
+
+<div class="hdr">
+  <div class="hdr-brand"><span class="hdr-accent"></span>Buyer Survey</div>
+</div>
+
+<div class="wrap">
+  <!-- INTRO -->
+  <div class="screen active" id="s-intro">
+    <div class="intro-rule">
+      <div class="rule-line"></div>
+      <div class="rule-text">Real Estate · Buyer Profile</div>
+      <div class="rule-line"></div>
+    </div>
+    <h1 class="intro-h">Find your<br><em>perfect home.</em></h1>
+    <p class="intro-sub">Tell us what you're looking for. We'll create a personalized buyer profile and make sure we find the right home for you.</p>
+    <button class="intro-begin" onclick="start()">
+      <div class="begin-pill">
+        Get started
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2.5 7h9M7.5 3l4 4-4 4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </button>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="qc"></div>
+
+  <!-- THANK YOU -->
+  <div class="screen" id="s-profile">
+    <div class="intro-rule">
+      <div class="rule-line"></div>
+      <div class="rule-text">Real Estate · Buyer Profile</div>
+      <div class="rule-line"></div>
+    </div>
+    <h1 class="intro-h" style="margin-bottom:16px;">You're all set.</h1>
+    <p class="intro-sub">We've received your answers and will be in touch soon to help you find the perfect home.</p>
+    <div style="margin-top:36px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--gold);"></div>
+        <span style="font-size:14px;color:var(--ink-2);font-weight:500;">Text Nikki &nbsp;·&nbsp; (734) 717-1152</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--gold);"></div>
+        <span style="font-size:14px;color:var(--ink-2);font-weight:500;">Call Michael &nbsp;·&nbsp; (248) 881-6619</span>
+      </div>
+    </div>
+    <button class="prof-restart" onclick="restart()" style="margin-top:40px;">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M10.5 6.5A4 4 0 1 1 6.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10.5 2.5v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Start over
+    </button>
+  </div>
+</div>
+
+<script>
+const KEYS=['A','B','C','D','E'];
+const ans={};
+let cur=-1;
+
+const Qs=[
+  {id:'name',     t:'text',   q:'What is your full name?',                        ph:'Jane Smith',                         req:true},
+  {id:'email',    t:'email',  q:'What is your email address?',                    ph:'jane@email.com',                     req:true},
+  {id:'address',  t:'text',   q:'What is your current home address?',             ph:'123 Main St, Ann Arbor, MI 48103'},
+  {id:'counties', t:'text',   q:'Which counties are you interested in?',          ph:'e.g. Washtenaw, Oakland, Wayne'},
+  {id:'cities',   t:'text',   q:'Which cities or towns are you considering?',     ph:'e.g. Ann Arbor, Saline, Plymouth'},
+  {id:'districts',t:'text',   q:'Any school districts that matter to you?',       ph:'e.g. Ann Arbor Public, Saline Area', sub:'Leave blank if schools aren\'t a current priority.'},
+  {id:'beds',     t:'select', q:'How many bedrooms?',                             opts:['1+','2+','3+','4+'],g2:true},
+  {id:'baths',    t:'select', q:'How many bathrooms?',                            opts:['1+','2+','3+','4+'],g2:true},
+  {id:'finance',  t:'select', q:'How will you finance the purchase?',             opts:['Cash','Pre-approved for a mortgage','Not yet pre-approved','Seller financed / land contract']},
+  {id:'price',    t:'text',   q:'What\'s your ideal price range?',                ph:'e.g. $300,000 – $450,000'},
+  {id:'interior', t:'multi',  q:'Which interior & exterior amenities matter?',    sub:'Tap all that apply.',opts:['Medium-Large Backyard','Finished Basement','Attached Garage','Walkout Basement','Mother-In-Law Suite','Fireplace','Deck / Patio','Main Floor Laundry','Pool','Fenced-In Yard']},
+  {id:'location', t:'multi',  q:'What kind of location are you after?',           sub:'Tap all that apply.',opts:['Gated Community','Private Road','Waterfront','Lake Access','Downtown','Country – Quiet','Dirt Road','Quiet Suburban','City – Urban']},
+  {id:'housing',  t:'select', q:'What type of home?',                             opts:['Single-Family Home','Apartment-Style Condo','Townhouse','Condo Community']},
+  {id:'condition',t:'select', q:'What condition are you looking for?',            opts:['Turn-key — no work needed','Some updates required','Full renovation','Furnished & move-in ready']},
+  {id:'timeline', t:'select', q:'How quickly are you looking to move?',           opts:['Immediately','1–2 months','3–9 months','9–12 months','A year or more']},
+  {id:'sell',     t:'select', q:'Do you need to sell another home first?',        opts:['Yes','No','Maybe'],g2:true},
+  {id:'pets',     t:'text',   q:'Any needs related to family pets?',             ph:'e.g. fenced yard for a large dog', sub:'Optional.',opt:true},
+  {id:'style',    t:'multi',  q:'What home style speaks to you?',                sub:'Tap as many as feel right.',opts:['Modern','Traditional','Modern Farmhouse','Mid-Century Modern','Industrial','Bohemian','Minimalist','Rustic']},
+  {id:'r_kit',    t:'rating', q:'How important is the kitchen & bathroom condition?', lo:'Not important',hi:'Essential'},
+  {id:'r_cond',   t:'rating', q:'How important is the home\'s overall condition?',    lo:'Not important',hi:'Essential'},
+  {id:'r_school', t:'rating', q:'How important are the local schools?',               lo:'Not important',hi:'Essential'},
+  {id:'r_resale', t:'rating', q:'How important is resale value?',                     lo:'Not important',hi:'Essential'},
+  {id:'notes',    t:'textarea',q:'Anything else we should know?',                ph:'Deal-breakers, must-haves, special circumstances...',sub:'Optional.',opt:true},
+];
+const TOTAL=Qs.length;
+
+function start(){go(0);}
+
+function go(idx){
+  cur=idx;
+  const qc=document.getElementById('qc');
+  qc.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.add('leaving');setTimeout(()=>s.remove(),300);});
+  const intro=document.getElementById('s-intro');
+  if(intro&&intro.classList.contains('active')){intro.classList.remove('active');intro.classList.add('leaving');setTimeout(()=>{intro.style.display='none';},300);}
+
+  document.getElementById('pf').style.width=Math.round(((idx+1)/TOTAL)*100)+'%';
+
+  const q=Qs[idx];
+  const div=document.createElement('div');
+  div.className='screen';div.id='q'+idx;
+
+  let html=`<div class="q-rule"><div class="q-rule-line"></div><div class="q-rule-dot"></div><div class="q-rule-line"></div></div>
+            <h2 class="q-title">${q.q}</h2>
+            ${q.sub?`<p class="q-sub">${q.sub}</p>`:''}`;
+
+  if(q.t==='text'||q.t==='email'){
+    html+=`<input class="q-input" id="inp${idx}" type="text" inputmode="${q.t==='email'?'email':'text'}"
+             placeholder="${q.ph||''}" value="${ans[q.id]||''}" autocomplete="off"
+             oninput="ans['${q.id}']=this.value;clearErr(${idx});"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();tryNext(${idx});}">
+           <div class="err-msg" id="err${idx}"></div>
+           <div class="enter-hint" onclick="tryNext(${idx})"><span class="enter-box">↵</span> Press Enter to continue</div>`;
+  } else if(q.t==='textarea'){
+    html+=`<textarea class="q-textarea" id="inp${idx}" rows="3" placeholder="${q.ph||''}"
+             oninput="ans['${q.id}']=this.value"
+             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();tryNext(${idx});}">${ans[q.id]||''}</textarea>
+           <div class="err-msg" id="err${idx}"></div>
+           <div class="enter-hint" onclick="tryNext(${idx})"><span class="enter-box">↵</span> Press Enter to continue</div>`;
+  } else if(q.t==='select'){
+    html+=`<div class="opts${q.g2?' g2':''}">`;
+    q.opts.forEach((o,i)=>{
+      const sel=ans[q.id]===o?' sel':'';
+      html+=`<button class="opt${sel}" onclick="pick(${idx},'${o.replace(/'/g,"\\'")}',this)"><span class="opt-k">${KEYS[i]}</span>${o}</button>`;
+    });
+    html+=`</div>`;
+  } else if(q.t==='multi'){
+    html+=`<div class="chips">`;
+    q.opts.forEach(o=>{
+      const sel=(ans[q.id]||[]).includes(o)?' sel':'';
+      html+=`<button class="chip${sel}" onclick="toggle(${idx},'${o.replace(/'/g,"\\'")}',this)">${o}</button>`;
+    });
+    html+=`</div><div class="enter-hint" onclick="tryNext(${idx})" style="margin-top:20px;"><span class="enter-box">↵</span> Press Enter to continue</div>`;
+  } else if(q.t==='rating'){
+    const cv=ans[q.id];
+    html+=`<div class="rating-row">`;
+    for(let n=1;n<=5;n++){html+=`<button class="r-btn${cv==n?' sel':''}" onclick="rate(${idx},${n},this)">${n}</button>`;}
+    html+=`</div><div class="r-labs"><span>${q.lo}</span><span>${q.hi}</span></div>`;
+  }
+
+  div.innerHTML=html;
+  qc.appendChild(div);
+  requestAnimationFrame(()=>div.classList.add('active'));
+  if(q.t==='text'||q.t==='email'||q.t==='textarea'){setTimeout(()=>{const el=document.getElementById('inp'+idx);if(el)el.focus();},420);}
+
+  document.onkeydown=(e)=>{
+    if(e.key==='Enter'&&q.t!=='text'&&q.t!=='email'&&q.t!=='textarea'){
+      if((q.t==='select'||q.t==='rating')&&!ans[q.id])return;
+      tryNext(idx);
+    }
+  };
+}
+
+function pick(idx,val,el){
+  ans[Qs[idx].id]=val;
+  document.querySelectorAll(`#q${idx} .opt`).forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  setTimeout(()=>tryNext(idx),360);
+}
+function toggle(idx,val,el){
+  if(!ans[Qs[idx].id])ans[Qs[idx].id]=[];
+  const a=ans[Qs[idx].id],i=a.indexOf(val);
+  if(i>-1){a.splice(i,1);el.classList.remove('sel');}else{a.push(val);el.classList.add('sel');}
+}
+function rate(idx,val,el){
+  ans[Qs[idx].id]=val;
+  document.querySelectorAll(`#q${idx} .r-btn`).forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  setTimeout(()=>tryNext(idx),360);
+}
+
+function isValidEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());}
+function showErr(idx,msg){const el=document.getElementById('inp'+idx),er=document.getElementById('err'+idx);if(el){el.classList.add('err');el.focus();}if(er)er.textContent=msg;}
+function clearErr(idx){const el=document.getElementById('inp'+idx),er=document.getElementById('err'+idx);if(el)el.classList.remove('err');if(er)er.textContent='';}
+
+function tryNext(idx){
+  const q=Qs[idx];
+  const val=(ans[q.id]||'').toString().trim();
+  if(q.t==='email'){
+    if(!val){showErr(idx,'Please enter your email address.');return;}
+    if(!isValidEmail(val)){showErr(idx,'Please enter a valid email — e.g. jane@gmail.com');return;}
+  } else if(q.t==='text'&&q.req&&!val){showErr(idx,'This field is required.');return;}
+  if(idx<TOTAL-1)go(idx+1);else showProfile();
+}
+
+function showProfile(){
+  document.getElementById('qc').querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.add('leaving');setTimeout(()=>s.remove(),300);});
+  document.getElementById('pf').style.width='100%';
+  setTimeout(()=>document.getElementById('s-profile').classList.add('active'),200);
+  document.onkeydown=null;
+}
+
+function restart(){
+  Object.keys(ans).forEach(k=>delete ans[k]);
+  cur=-1;
+  document.getElementById('s-profile').classList.remove('active');
+  document.getElementById('qc').innerHTML='';
+  document.getElementById('pf').style.width='0%';
+  const intro=document.getElementById('s-intro');
+  intro.style.display='';intro.classList.remove('leaving');
+  requestAnimationFrame(()=>intro.classList.add('active'));
+  document.onkeydown=null;
+}
+</script>
+</body>
+</html>
