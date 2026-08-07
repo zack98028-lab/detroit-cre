@@ -6,23 +6,23 @@
 <title>Home Buyer Profile Survey</title>
 <style>
 :root {
-  --bg:      #F9F6F1;
-  --surface: #FFFFFF;
+  --bg:      #FFFFFF;
+  --surface: #F8FFFE;
   --ink:     #1A1714;
   --ink-2:   #6B6560;
   --ink-3:   #B0A89E;
-  --green:   #1E4D35;
-  --green-lt:#E8F0EC;
+  --green:   #16A34A;
+  --green-lt:#DCFCE7;
   --gold:    #B8924A;
-  --border:  #E0DAD2;
-  --line:    #D4CEC6;
+  --border:  #D1FAE5;
+  --line:    #BBF7D0;
 }
 @media(prefers-color-scheme:dark){:root{
-  --bg:#131210;--surface:#1C1A17;--ink:#F0EDE8;--ink-2:#908880;
-  --ink-3:#585248;--green:#5FAF7E;--green-lt:#1E4D3520;--border:#2E2B27;--line:#2A2720;
+  --bg:#FFFFFF;--surface:#F8FFFE;--ink:#1A1714;--ink-2:#6B6560;
+  --ink-3:#B0A89E;--green:#16A34A;--green-lt:#DCFCE7;--border:#D1FAE5;--line:#BBF7D0;
 }}
-:root[data-theme="light"]{--bg:#F9F6F1;--surface:#FFFFFF;--ink:#1A1714;--ink-2:#6B6560;--ink-3:#B0A89E;--green:#1E4D35;--green-lt:#E8F0EC;--border:#E0DAD2;--line:#D4CEC6;}
-:root[data-theme="dark"]{--bg:#131210;--surface:#1C1A17;--ink:#F0EDE8;--ink-2:#908880;--ink-3:#585248;--green:#5FAF7E;--green-lt:#1E4D3520;--border:#2E2B27;--line:#2A2720;}
+:root[data-theme="light"]{--bg:#FFFFFF;--surface:#F8FFFE;--ink:#1A1714;--ink-2:#6B6560;--ink-3:#B0A89E;--green:#16A34A;--green-lt:#DCFCE7;--border:#D1FAE5;--line:#BBF7D0;}
+:root[data-theme="dark"]{--bg:#FFFFFF;--surface:#F8FFFE;--ink:#1A1714;--ink-2:#6B6560;--ink-3:#B0A89E;--green:#16A34A;--green-lt:#DCFCE7;--border:#D1FAE5;--line:#BBF7D0;}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
@@ -215,6 +215,15 @@ body::before{
   display:flex;justify-content:space-between;
   font-size:11px;color:var(--ink-3);margin-top:8px;
 }
+
+/* ── CONTINUE BUTTON ── */
+.continue-btn{
+  margin-top:20px;background:var(--green);color:#fff;
+  border:none;border-radius:100px;padding:12px 28px;
+  font-size:15px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:opacity .15s;
+}
+.continue-btn:hover{opacity:.88;}
 
 /* ── PROFILE RESULT ── */
 .prof-rule{
@@ -423,13 +432,13 @@ function go(idx){
              oninput="ans['${q.id}']=this.value;clearErr(${idx});"
              onkeydown="if(event.key==='Enter'){event.preventDefault();tryNext(${idx});}">
            <div class="err-msg" id="err${idx}"></div>
-           <div class="enter-hint" onclick="tryNext(${idx})"><span class="enter-box">↵</span> Press Enter to continue</div>`;
+           <button class="continue-btn" onclick="tryNext(${idx})">Continue →</button>`;
   } else if(q.t==='textarea'){
     html+=`<textarea class="q-textarea" id="inp${idx}" rows="3" placeholder="${q.ph||''}"
              oninput="ans['${q.id}']=this.value"
              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();tryNext(${idx});}">${ans[q.id]||''}</textarea>
            <div class="err-msg" id="err${idx}"></div>
-           <div class="enter-hint" onclick="tryNext(${idx})"><span class="enter-box">↵</span> Press Enter to continue</div>`;
+           <button class="continue-btn" onclick="tryNext(${idx})">Continue →</button>`;
   } else if(q.t==='select'){
     html+=`<div class="opts${q.g2?' g2':''}">`;
     q.opts.forEach((o,i)=>{
@@ -443,7 +452,7 @@ function go(idx){
       const sel=(ans[q.id]||[]).includes(o)?' sel':'';
       html+=`<button class="chip${sel}" onclick="toggle(${idx},'${o.replace(/'/g,"\\'")}',this)">${o}</button>`;
     });
-    html+=`</div><div class="enter-hint" onclick="tryNext(${idx})" style="margin-top:20px;"><span class="enter-box">↵</span> Press Enter to continue</div>`;
+    html+=`</div><button class="continue-btn" onclick="tryNext(${idx})" style="margin-top:20px;">Continue →</button>`;
   } else if(q.t==='rating'){
     const cv=ans[q.id];
     html+=`<div class="rating-row">`;
