@@ -1475,9 +1475,14 @@ function enrichAndScore(lead, propType){
 // ── Main live search coordinator — 4 sources in parallel ─────────────────────
 async function runLiveSearch(property, t0){
   const type=detectPropertyType(property);
-  const location=extractLocation(property);
+  let location=extractLocation(property);
+  // If no city detected, ask the user before proceeding
+  if(!location || location==='Ann Arbor'){
+    const entered=prompt('What city is this property in? (e.g. Detroit, Grand Rapids, Lansing)');
+    if(entered && entered.trim()) location=entered.trim();
+  }
   const coords=await geocodeCity(location);
-  const city=location.split(',')[0];
+  const city=(location||'Ann Arbor').split(',')[0].trim()||'Ann Arbor';
   const fill=document.getElementById('walkBarFill');
   const status=document.getElementById('walkStatus');
 
@@ -2296,7 +2301,7 @@ async function enrichWithClearbit(leads){
 
 function showResultsLive(leads,t0,location,type){
   const elapsed=t0?((Date.now()-t0)/1000).toFixed(1):'—';
-  const city=location.split(',')[0];
+  const city=(location||'Ann Arbor').split(',')[0].trim()||'Ann Arbor';
   document.getElementById('heroCard').style.display='none';
 
   const typeLabels={
