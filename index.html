@@ -3583,7 +3583,7 @@ function generateCallScript(l){
 
   const propRaw=document.getElementById('propertyAuto')?.value?.trim()||'commercial property';
   const propType=detectPropertyType(propRaw);
-  const city=extractLocation(propRaw).split(',')[0];
+  const city=(extractLocation(propRaw)||'Michigan').split(',')[0].trim()||'Michigan';
   const propPrice=window._currentPropPrice||1200000;
 
   // Build hyper-personalized hook using every signal we have
