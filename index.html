@@ -1476,10 +1476,10 @@ function enrichAndScore(lead, propType){
 async function runLiveSearch(property, t0){
   const type=detectPropertyType(property);
   let location=extractLocation(property);
-  // If no city detected, ask the user before proceeding
+  // If no city detected, ask via in-page modal
   if(!location || location==='Ann Arbor'){
-    const entered=prompt('What city is this property in? (e.g. Detroit, Grand Rapids, Lansing)');
-    if(entered && entered.trim()) location=entered.trim();
+    location = await askCityModal();
+    if(!location) location='Detroit';
   }
   const coords=await geocodeCity(location);
   const city=(location||'Ann Arbor').split(',')[0].trim()||'Ann Arbor';
@@ -2857,8 +2857,25 @@ function findDeep(obj,key,depth=0){
 }
 
 async function runAuto(){
-  const property=document.getElementById('propertyAuto').value.trim();
-  if(!property){alert('Enter a property description first.');return;}
+  // Accept either typed description OR pasted Crexi URL
+  let property=document.getElementById('propertyAuto').value.trim();
+  if(!property){
+    // Try pulling from URL box and extracting details from slug
+    const urlVal=document.getElementById('crexiUrl').value.trim();
+    if(urlVal){
+      const slug=urlVal.replace(/https?:\/\/[^/]+\/[^/]+\//,'').replace(/[?#].*/,'');
+      const parts=slug.split('-');
+      const typeWords=['bar','restaurant','office','warehouse','retail','industrial','mixed','hotel','motel','gas','station','strip','mall','plaza','building','land','multifamily','apartment'];
+      const detectedType=typeWords.find(t=>parts.includes(t))||'commercial property';
+      const miCities=['detroit','ann arbor','lansing','grand rapids','flint','kalamazoo','troy','sterling','pontiac','dearborn','warren','livonia','westland','southfield','novi','canton','ypsilanti','jackson','muskegon','saginaw','midland','traverse'];
+      const detectedCity=miCities.find(c=>slug.replace(/-/g,' ').includes(c));
+      const cityStr=detectedCity?detectedCity.replace(/\b\w/g,x=>x.toUpperCase()):'Michigan';
+      property=`${detectedType} in ${cityStr}`;
+      document.getElementById('propertyAuto').value=property;
+    } else {
+      showInPageAlert('Enter a property description or paste a Crexi URL first.');return;
+    }
+  }
   const t0=Date.now();
 
   const wrap=document.getElementById('walkWrap');
@@ -3945,6 +3962,44 @@ function printLeads(){
 // ═════════════════════════ HELPERS ═════════════════════════
 function show(id){document.getElementById(id).classList.add('show');}
 function scroll(id){setTimeout(()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}),120);}
+
+function showInPageAlert(msg){
+  document.getElementById('inPageAlertMsg').textContent=msg;
+  document.getElementById('inPageAlert').style.display='flex';
+  setTimeout(()=>document.getElementById('inPageAlert').style.display='none',3500);
+}
+
+function askCityModal(){
+  return new Promise(resolve=>{
+    const modal=document.getElementById('cityModal');
+    const input=document.getElementById('cityModalInput');
+    input.value='';
+    modal.style.display='flex';
+    input.focus();
+    document.getElementById('cityModalOk').onclick=()=>{
+      const v=input.value.trim();
+      modal.style.display='none';
+      resolve(v||'Detroit');
+    };
+    input.onkeydown=e=>{if(e.key==='Enter'){document.getElementById('cityModalOk').click();}};
+  });
+}
 </script>
+
+<!-- In-page alert -->
+<div id="inPageAlert" style="display:none;position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;background:#1e293b;border:1px solid #ef4444;color:#fca5a5;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.5);align-items:center;gap:10px;">
+  <span>⚠️</span><span id="inPageAlertMsg"></span>
+</div>
+
+<!-- City modal -->
+<div id="cityModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
+  <div style="background:#1e293b;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:32px 28px;width:min(90vw,400px);box-shadow:0 32px 80px rgba(0,0,0,.6);">
+    <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">What city is this property in?</div>
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:18px;">e.g. Detroit, Grand Rapids, Ann Arbor, Lansing</div>
+    <input id="cityModalInput" type="text" placeholder="City name..." style="width:100%;background:#0f172a;border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:12px 14px;color:#fff;font-size:15px;outline:none;box-sizing:border-box;">
+    <button id="cityModalOk" style="margin-top:16px;width:100%;background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">Search This City →</button>
+  </div>
+</div>
+
 </body>
 </html>
