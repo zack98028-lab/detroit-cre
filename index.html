@@ -1479,6 +1479,7 @@ async function runLiveSearch(property, t0){
   }
   const coords=await geocodeCity(location);
   const city=(location||'Ann Arbor').split(',')[0].trim()||'Ann Arbor';
+  currentCity=city;
   const fill=document.getElementById('walkBarFill');
   const status=document.getElementById('walkStatus');
 
@@ -2664,6 +2665,7 @@ const POWER_LEADS = [
 
 const ALL_LEADS = [...LEADS, ...EXTRA_LEADS, ...BONUS_LEADS, ...POWER_LEADS];
 let currentLeads = ALL_LEADS;
+let currentCity = 'Michigan';
 let currentModal = null;
 
 // Each listing gets its own board of leads
@@ -3064,7 +3066,7 @@ function renderCallList(leads){
     const leaseNote=l._leaseHot&&l._leaseExpiry?` Your lease ${l._leaseExpiry<=new Date().getFullYear()?'likely just came up':'is coming up around '+l._leaseExpiry} — ideal timing.`:'';
     const reviewNote=l._reviews>100?` ${l._reviews} reviews tells me you're busy.`:'';
     const sbaNote=l._sba504Monthly?` SBA 504: ~$${l._sba504Monthly.toLocaleString()}/mo, ~10% down.`:'';
-    const opener=`"${ownerFirst} ... I'm [Broker], commercial real estate. I have a property built out specifically for ${txt2.includes('dental')?'dental practices':txt2.includes('restaurant')?'restaurants':txt2.includes('medical')||txt2.includes('clinic')?'medical offices':txt2.includes('law')?'law firms':'your type of business'} in ${city}.${leaseNote}${reviewNote}${sbaNote} Worth 2 minutes?"`;
+    const opener=`"${ownerFirst} ... I'm [Broker], commercial real estate. I have a property built out specifically for ${txt2.includes('dental')?'dental practices':txt2.includes('restaurant')?'restaurants':txt2.includes('medical')||txt2.includes('clinic')?'medical offices':txt2.includes('law')?'law firms':'your type of business'} in ${currentCity}.${leaseNote}${reviewNote}${sbaNote} Worth 2 minutes?"`;
     const sbaTag=l._sba504Monthly?`<div style="margin-top:5px;font-size:10px;color:#6EE7B7;background:#052e16;border:1px solid #166534;border-radius:4px;padding:3px 6px;display:inline-block;">💰 SBA 504: ~$${l._sba504Monthly.toLocaleString()}/mo · ~$${l._sba504Down?Math.round(l._sba504Down/1000)+'K':'—'} down</div>`:'';
     const hotZoneTag=l._hotZone?`<div style="margin-top:5px;margin-left:6px;font-size:10px;color:#FDE68A;background:#451a03;border:1px solid #92400e;border-radius:4px;padding:3px 6px;display:inline-block;">🔥 Hot Zone · ${l._hotZoneCount}+ nearby</div>`:'';
 
