@@ -2736,7 +2736,7 @@ function runDemo(){
 
 async function fakeImport(){
   const url=document.getElementById('crexiUrl').value.trim();
-  if(!url){alert('Paste a Crexi listing URL first.');return;}
+  if(!url){showInPageAlert('Paste a Crexi listing URL first.');return;}
   const btn=event.target;
   btn.textContent='Fetching...';btn.disabled=true;
   const statusEl=document.getElementById('importStatus');
@@ -2953,7 +2953,7 @@ function showResults(t0){
     window.scrollTo(0, 0);
 
   } catch(err) {
-    alert('Error loading results: ' + err.message + '\n\nTry clicking Load Demo instead.');
+    showInPageAlert('Error loading results: ' + err.message);
   }
 }
 
