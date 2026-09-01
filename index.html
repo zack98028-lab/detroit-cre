@@ -2746,18 +2746,39 @@ async function fakeImport(){
   const statusEl=document.getElementById('importStatus');
   if(statusEl) statusEl.textContent='Pulling listing data...';
 
+  // Try live scrape first
+  let scraped = false;
   try {
     const desc = await scrapeCrexi(url);
     document.getElementById('propertyAuto').value = desc;
-    btn.textContent='Import URL';btn.disabled=false;
-    if(statusEl) statusEl.textContent='';
+    scraped = true;
     showToast('Property imported — review details then click Run Pipeline','#22c55e');
   } catch(e) {
-    btn.textContent='Import URL';btn.disabled=false;
-    if(statusEl) statusEl.textContent='';
-    showToast('Could not auto-import — paste property details manually','#ef4444');
-    console.warn('Crexi import failed:',e);
+    console.warn('Crexi scrape failed, extracting from URL instead:', e);
   }
+
+  // If scrape failed, extract what we can from the URL slug
+  if(!scraped){
+    const slug = url.replace(/https?:\/\/[^/]+\/[^/]+\//,'').replace(/[?#].*/,'');
+    // slug e.g. "michigan-525-w-mitchell-st" or "detroit-bar-building-4500-sqft"
+    const parts = slug.split('-');
+    // detect property type keywords
+    const typeWords = ['bar','restaurant','office','warehouse','retail','industrial','mixed','hotel','motel','gas','station','strip','mall','plaza','building','land','multifamily','apartment'];
+    const detectedType = typeWords.find(t=>parts.includes(t)) || 'commercial property';
+    // detect Michigan cities in slug
+    const miCities = ['detroit','ann-arbor','lansing','grand-rapids','flint','kalamazoo','troy','sterling','pontiac','dearborn','warren','livonia','westland','southfield','novi','canton','ypsilanti','jackson','muskegon','saginaw','midland','traverse'];
+    const detectedCity = miCities.find(c=>slug.includes(c));
+    const cityStr = detectedCity ? detectedCity.replace(/-/g,' ').replace(/\b\w/g,x=>x.toUpperCase()) : 'Michigan';
+    // build address hint from slug numbers/streets
+    const addrHint = parts.filter(p=>/^\d+$/.test(p)||['st','ave','blvd','rd','dr','ln','way','n','s','e','w'].includes(p)).join(' ').trim();
+
+    const prefilled = `${detectedType} in ${cityStr}${addrHint?' near '+addrHint:''} — ADD: square footage, asking price, and any key features`;
+    document.getElementById('propertyAuto').value = prefilled;
+    if(statusEl) statusEl.textContent = '⚠️ Crexi blocked auto-import. We pulled what we could from the URL — fill in price & sq ft below.';
+    showToast('Fill in price & sq ft, then hit Run Pipeline','#f59e0b');
+  }
+
+  btn.textContent='Import URL'; btn.disabled=false;
 }
 
 async function scrapeCrexi(url){
