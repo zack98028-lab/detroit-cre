@@ -1473,7 +1473,7 @@ async function runLiveSearch(property, t0){
   const type=detectPropertyType(property);
   let location=extractLocation(property);
   // If no city detected, ask via in-page modal
-  if(!location || location==='Ann Arbor'){
+  if(!location){
     location = await askCityModal();
     if(!location) location='Detroit';
   }
